@@ -1,4 +1,4 @@
-# Library Management System (DBMS Project
+# Library Management System (DBMS Projec
 
 A complete, full-stack college DBMS project for managing a library's book inventory, student/faculty memberships, and borrowing transactions with referential integrity.
 
