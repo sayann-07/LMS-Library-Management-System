@@ -37,6 +37,14 @@ const PORT = process.env.PORT || 5000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // ---------------------------------------------------------------------------
+// Reverse Proxy Configuration (Render / Reverse Proxy Deployments)
+// ---------------------------------------------------------------------------
+// Trust the first-hop reverse proxy to accurately identify client IPs from the
+// X-Forwarded-For header, preventing express-rate-limit ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
+// while guarding against upstream IP spoofing.
+app.set('trust proxy', 1);
+
+// ---------------------------------------------------------------------------
 // Security Headers via Helmet (Hardened Production Profile)
 // ---------------------------------------------------------------------------
 app.use(
@@ -211,6 +219,7 @@ const startServer = async () => {
     console.log(`  Listening on: http://${HOST}:${PORT}               `);
     console.log(`  Health Check: http://${HOST}:${PORT}/api/health    `);
     console.log(`  Environment:  ${process.env.NODE_ENV || 'development'}     `);
+    console.log(`  Trust Proxy:  ${app.get('trust proxy')} (Render 1-hop configured) `);
     console.log('====================================================');
   });
 

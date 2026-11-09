@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { pool } = require('../config/db');
 const { revokeToken } = require('../utils/tokenBlacklist');
 const { logSecurityEvent } = require('../utils/securityLogger');
+const { getValidJwtExpiresIn } = require('../utils/jwtConfig');
 
 // Dummy hash for constant-time comparison when user does not exist (mitigate username enumeration timing attacks)
 const DUMMY_HASH = '$2b$10$e8N8gJek.PqA1zTf62d1uOCn69hWk1jVlmvJNuUjNrmuGq7PZ3vce';
@@ -64,11 +65,28 @@ const loginAdmin = async (req, res, next) => {
       throw new Error('JWT_SECRET is not configured on the production server.');
     }
 
-    const token = jwt.sign(
-      { admin_id: admin.admin_id, username: admin.username },
-      secret || 'fallback_secret_for_development_only',
-      { expiresIn: process.env.JWT_EXPIRES_IN || '1d' }
-    );
+    const signingSecret = secret || 'fallback_secret_for_development_only';
+    const expiresIn = getValidJwtExpiresIn(process.env.JWT_EXPIRES_IN);
+
+    let token;
+    try {
+      token = jwt.sign(
+        { admin_id: admin.admin_id, username: admin.username },
+        signingSecret,
+        { expiresIn }
+      );
+    } catch (signError) {
+      logSecurityEvent('AUTH_JWT_SIGN_FALLBACK', {
+        username: admin.username,
+        error: signError.message,
+        severity: 'WARN'
+      });
+      token = jwt.sign(
+        { admin_id: admin.admin_id, username: admin.username },
+        signingSecret,
+        { expiresIn: '1d' }
+      );
+    }
 
     logSecurityEvent('AUTH_LOGIN_SUCCESS', {
       admin_id: admin.admin_id,

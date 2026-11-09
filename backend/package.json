@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "seed:admin": "node scripts/seedAdmin.js",
     "verify": "node scripts/verify-backend.js",
-    "test:security": "node scripts/security-audit-test.js"
+    "test:security": "node scripts/security-audit-test.js",
+    "test:prod-fixes": "node scripts/test-production-auth-fixes.js"
   },
   "keywords": [
     "library",

@@ -4,9 +4,11 @@
  * Automatically purges expired entries every hour to conserve memory.
  */
 
+const { getJwtExpiresInMs } = require('./jwtConfig');
+
 const revokedTokens = new Map(); // tokenString -> expiryTimestampMs
 
-const revokeToken = (token, expiresInMs = 24 * 60 * 60 * 1000) => {
+const revokeToken = (token, expiresInMs = getJwtExpiresInMs()) => {
   if (!token) return;
   const expiry = Date.now() + expiresInMs;
   revokedTokens.set(token, expiry);
